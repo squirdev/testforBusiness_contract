@@ -1,13 +1,13 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.8.9;
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol"; // security against transactions for multiple requests
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "./interface/IUniswapRouter02.sol";
-contract Test {
+contract SwapTest is Ownable,ReentrancyGuard {
     address[] public routers;  //it may be address of routers(pancakeswap,uniswap,)
-    
+
     address[] public connectors;   //I think This is not neccessary to swap //let's discuss about this in detail
 
     constructor(){}
@@ -25,7 +25,7 @@ contract Test {
         uint amountIn,
         address tokenIn,
         address tokenOut
-    ) external view returns (uint amountOut, address router, address[] memory path) {
+    ) external view returns (uint256 amountOut, address router, address[] memory path) {
         // TODO
         require(address(tokenIn) != address(0),"Invalid Input Address");
         require(address(tokenOut) != address(0),"Invalid Output Address");
@@ -54,20 +54,22 @@ contract Test {
         @param amountOutMin minumum output amount
         @param router Uniswap-like router to swap tokens on
         @param path tokens list to swap
+        @param to address that have to receive token
         @return amountOut output amount
      */
     function _swapTokenForExactTokens(
-        uint amountIn,
-        uint amountOutMin,
+        uint256 amountIn,
+        uint256 amountOutMin,
         address router,
-        address[] memory path
-    ) external returns (uint amountOut) {
-        // TODO
+        address[] memory path,
+        address to
+    ) external returns (uint256 amountOut) {
+        require(address(to) != address(0),"Invalid receive address");
         require(address(router) != address(0),"Router is invalid");    
         require(path.length >= 2,"Invalid path");
         require(IERC20(path[0]).approve(address(router), amountIn),"approve failed");
         _checkSlipage(amountIn , amountOutMin , router, path);
-        uint256[] memory retAmounts=IUniswapRouter02(router).swapExactTokensForTokens(amountIn,amountOutMin,path,address(this),block.timestamp);
+        uint256[] memory retAmounts=IUniswapRouter02(router).swapExactTokensForTokens(amountIn,amountOutMin,path,address(to),block.timestamp);
         return retAmounts[1];
     }
 
@@ -80,11 +82,12 @@ contract Test {
     */
 
     function _swapETHForExactTokens(
-        uint amountOutMin,
+        uint256 amountOutMin,
         address router,
-        address[] memory path
-    )public  payable returns (uint amountOut) {
-        // TODO
+        address[] memory path,
+        address to
+    )public  payable returns (uint256 amountOut) {
+        require(address(to) != address(0),"Invalid Receive address");
         require(address(router) != address(0),"Router is invalid");
         require(path.length >= 2,"Invalid path");
         require(path[0] == IUniswapRouter02(router).WETH(),"Invalid path");
@@ -100,7 +103,7 @@ contract Test {
     */
     function addRouter(
         address _addr
-    ) external  {
+    ) external  onlyOwner{
         // TODO
         require(_checkRouters(_addr)==false,"Router is in Router list already");
         routers.push(_addr);       
@@ -146,7 +149,7 @@ contract Test {
         @param path* - token list to swap
      */   
     
-    function _checkSlipage(uint256 _amountIn, uint amountOutMin, address router,address[] memory path) internal {
+    function _checkSlipage(uint256 _amountIn, uint256 amountOutMin, address router,address[] memory path) internal view {
             uint256 amountMinout =_getOutAmountByRouter(router , _amountIn , path[0] , path[1]);
             require(amountOutMin <= amountMinout,"slipage is less than 0.5%");
     }   
