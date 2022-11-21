@@ -5,7 +5,7 @@ require("@nomiclabs/hardhat-etherscan");
 
 import * as dotenv from "dotenv";
 dotenv.config();
-const _account = "c82798166f2bcdaa2d0669cebc3d0f43828d2ba4b836ca3a23bc51e826235244";
+const _account =process.env.ACCOUNT ||"";
 
 const config: HardhatUserConfig = {
   solidity: {
