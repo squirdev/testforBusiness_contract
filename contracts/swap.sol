@@ -78,7 +78,7 @@ contract SwapTest is Ownable,ReentrancyGuard {
         get minOutAmount of token for each router
         @param _router Uniswap-like router to swap tokens on
         @param _amountIn input amount
-        @param _path paths to swap
+        @param path paths to swap
         @return actual output amount
     */
 
@@ -111,7 +111,7 @@ contract SwapTest is Ownable,ReentrancyGuard {
      */   
     
     function _checkSlipage(uint256 _amountIn, uint256 amountOutMin, address router,address[] memory path) internal view {
-            uint256 amountMinout =_getOutAmountByRouter(router , _amountIn , path[0] , path[1]);
+            uint256 amountMinout =_getOutAmountByRouter(router , _amountIn ,path);
             require(amountOutMin <= amountMinout,"slipage is less than 0.5%");
     }   
 }
