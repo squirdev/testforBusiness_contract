@@ -4,6 +4,7 @@ import { ethers } from "hardhat";
 async function main() {
   let [owner] = await ethers.getSigners();
   const pancakeswapRouter ="0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3";
+  const bikeryswapRouter = "0xCDe540d7eAFE93aC5fE6233Bee57E1270D3E330F";
   const tokenAggregateContractAddress = [
     "0x143db3CEEfbdfe5631aDD3E50f7614B6ba708BA7", //eth
     "0xE4eE17114774713d2De0eC0f035d4F7665fc025D", //Dai
