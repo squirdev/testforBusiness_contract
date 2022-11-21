@@ -118,7 +118,7 @@ contract SwapTest is Ownable,ReentrancyGuard {
         @return actual output amount
     */
 
-    function _getOutAmountByRouter(address _router , uint256 _amountIn , address _tokenIn , address _tokenOut) internal view returns (uint256){
+    function _getOutAmountByRouter(address _router , uint256 _amountIn , address _tokenIn , address _tokenOut) public view returns (uint256){
             address[] memory path = new address[](2);
             path[0] = address(_tokenIn);
             path[1] = address(_tokenOut);
