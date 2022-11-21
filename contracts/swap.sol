@@ -12,41 +12,6 @@ contract SwapTest is Ownable,ReentrancyGuard {
 
     constructor(){}
     
-    /**
-        get suitable router that has best price 
-        @param amountIn   input amount
-        @param tokenIn    source token
-        @param tokenOut   destination token
-        @return amountOut amount of out token that has best price to swap
-        @return router    amount of out token to swap
-        @return path      path* - token list to swap
-     */
-    function quote(
-        uint amountIn,
-        address tokenIn,
-        address tokenOut
-    ) external view returns (uint256 amountOut, address router, address[] memory path) {
-        // TODO
-        require(address(tokenIn) != address(0),"Invalid Input Address");
-        require(address(tokenOut) != address(0),"Invalid Output Address");
-        require(address(tokenIn) != address(tokenOut),"In token And Out Token is same");
-        uint256 _maxOut=0;
-        uint256 _i=0;
-        for(uint256 i = 0; i < routers.length; i++){
-            uint256 tmp = _getOutAmountByRouter(routers[i],amountIn,tokenIn,tokenOut);
-            if(_maxOut < tmp){
-                _maxOut = tmp;
-                _i =i;
-            }
-        }
-        path = new address[](2);
-        path[0] = tokenIn;
-        path[1] = tokenOut;
-
-        amountOut = _maxOut;
-
-        router = routers[_i];
-    }
 
     /**
         Swaps tokens on router with path, should check slippage
@@ -113,15 +78,11 @@ contract SwapTest is Ownable,ReentrancyGuard {
         get minOutAmount of token for each router
         @param _router Uniswap-like router to swap tokens on
         @param _amountIn input amount
-        @param _tokenIn source token
-        @param _tokenOut destination token
+        @param _path paths to swap
         @return actual output amount
     */
 
-    function _getOutAmountByRouter(address _router , uint256 _amountIn , address _tokenIn , address _tokenOut) public view returns (uint256){
-            address[] memory path = new address[](2);
-            path[0] = address(_tokenIn);
-            path[1] = address(_tokenOut);
+    function _getOutAmountByRouter(address _router , uint256 _amountIn , address[] memory path) public view returns (uint256){
             uint256 amountOut = IUniswapRouter02(_router).getAmountsOut(_amountIn,path)[1];
             uint256 amountMinout = amountOut*(1000-5)/1000; //slipage 0.5%
             return amountMinout;
